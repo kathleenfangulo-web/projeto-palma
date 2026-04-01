@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projeto Palma · Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #1a4a2e;
+    --green-mid: #2d6a45;
+    --green-light: #4a9463;
+    --gold: #c8922a;
+    --gold-light: #e8b84b;
+    --cream: #f5f0e8;
+    --white: #fefcf8;
+    --text: #1a1a18;
+    --muted: #6b6b60;
+    --border: #d8d0c0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height: 100vh; }
+
+  .top-bar {
+    background: var(--green);
+    padding: 24px 20px 18px;
+    display: flex; justify-content: space-between; align-items: flex-end;
+  }
+  .top-bar h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px; color: var(--cream); line-height: 1.2;
+  }
+  .top-bar h2 em { color: var(--gold-light); font-style: italic; }
+  .top-bar p { font-size: 11px; color: rgba(245,240,232,0.45); margin-top: 2px; }
+  .today-badge {
+    background: rgba(200,146,42,0.2);
+    border: 1px solid rgba(200,146,42,0.35);
+    color: var(--gold-light);
+    font-size: 11px; font-weight: 600;
+    padding: 5px 10px; border-radius: 20px;
+    text-align: right; white-space: nowrap;
+  }
+
+  .body { padding: 16px; }
+
+  /* Progress */
+  .progress-card {
+    background: var(--green);
+    border-radius: 16px; padding: 18px;
+    margin-bottom: 14px; color: var(--cream);
+  }
+  .progress-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+  .progress-header h3 { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--cream); }
+  .progress-header h3 em { color: var(--gold-light); font-style: italic; }
+  .big-num { font-family: 'DM Serif Display', serif; font-size: 34px; color: var(--gold-light); line-height: 1; }
+  .big-num span { font-size: 12px; color: rgba(245,240,232,0.5); font-family: 'DM Sans', sans-serif; }
+  .progress-track { background: rgba(255,255,255,0.1); border-radius: 100px; height: 8px; overflow: hidden; margin-bottom: 8px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 100px; transition: width 1.2s ease; width: 0%; }
+  .progress-meta { display: flex; justify-content: space-between; font-size: 11px; color: rgba(245,240,232,0.5); }
+
+  /* Metrics */
+  .section-row { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin: 4px 0 8px; }
+  .section-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .metric-card { background: var(--white); border-radius: 14px; padding: 14px; border: 1px solid var(--border); }
+  .metric-card .m-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .metric-card .m-value { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--text); line-height: 1; }
+  .metric-card .m-value span { font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--muted); }
+  .metric-card .m-status { font-size: 11px; color: var(--muted); margin-top: 5px; display: flex; align-items: center; gap: 4px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  .dot-green { background: #4a9463; }
+  .dot-grey { background: #ccc; }
+  .dot-gold { background: var(--gold); }
+
+  /* Update cards */
+  .update-card { background: var(--white); border-radius: 14px; padding: 14px; border: 1px solid var(--border); margin-bottom: 10px; }
+  .uc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .uc-title { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+  .uc-time { font-size: 10px; color: #bbb; }
+  .uc-text { font-size: 13px; color: var(--text); line-height: 1.55; }
+  .empty { font-size: 12px; color: #bbb; font-style: italic; }
+
+  /* Refresh */
+  .refresh-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .refresh-btn {
+    display: flex; align-items: center; gap: 6px;
+    background: none; border: 1.5px solid var(--border);
+    border-radius: 100px; padding: 7px 14px;
+    font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600;
+    color: var(--muted); cursor: pointer; transition: border-color 0.2s, color 0.2s;
+  }
+  .refresh-btn:hover { border-color: var(--green-mid); color: var(--green); }
+  .last-update { font-size: 11px; color: #bbb; }
+
+  .spin { animation: spin 0.8s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Loading skeleton */
+  .skeleton { background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: 6px; height: 20px; }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  /* History table */
+  .history-card { background: var(--white); border-radius: 14px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 20px; }
+  .history-card table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .history-card th { background: var(--cream); padding: 10px 12px; text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
+  .history-card td { padding: 10px 12px; border-bottom: 1px solid #f0ece4; color: var(--text); vertical-align: top; }
+  .history-card tr:last-child td { border-bottom: none; }
+  .history-card tr:hover td { background: #faf8f3; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 600; }
+  .badge-manut { background: rgba(42,82,180,0.1); color: #2a52b4; }
+  .badge-expans { background: rgba(45,106,69,0.12); color: #2d6a45; }
+  .badge-proc { background: rgba(200,146,42,0.12); color: #a07020; }
+  .badge-gest { background: rgba(120,60,160,0.1); color: #783ca0; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div>
+    <h2>Projeto <em>Palma</em><br>Dashboard Diário</h2>
+    <p>JFS Group · TotalEnergies TEPMA1</p>
+  </div>
+  <div class="today-badge" id="date-badge">—</div>
+</div>
+
+<div class="body">
+
+  <!-- Progress -->
+  <div class="progress-card">
+    <div class="progress-header">
+      <div>
+        <h3>Meta de <em>Expansão</em></h3>
+        <p style="font-size:11px;color:rgba(245,240,232,0.45);margin-top:2px;">Campanha 2025/26 · 170.000 mudas</p>
+      </div>
+      <div style="text-align:right">
+        <div class="big-num" id="total-mudas">—<span> mudas</span></div>
+        <div style="font-size:11px;color:rgba(245,240,232,0.45);margin-top:3px;">plantadas até hoje</div>
+      </div>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <div class="progress-meta">
+      <span id="pct-label">Carregando...</span>
+      <span id="remaining-label">—</span>
+    </div>
+  </div>
+
+  <!-- Refresh row -->
+  <div class="refresh-row">
+    <div class="last-update" id="last-update">Atualizando...</div>
+    <button class="refresh-btn" id="refresh-btn" onclick="loadData()">
+      <span id="refresh-icon">↻</span> Atualizar
+    </button>
+  </div>
+
+  <!-- Today metrics -->
+  <div class="section-row">Hoje</div>
+  <div class="section-grid">
+    <div class="metric-card">
+      <div class="m-label">🌿 Manutenção</div>
+      <div class="m-value" id="val-ha">—<span> ha</span></div>
+      <div class="m-status" id="st-manut"><span class="dot dot-grey"></span> Aguardando</div>
+    </div>
+    <div class="metric-card">
+      <div class="m-label">🥥 Expansão</div>
+      <div class="m-value" id="val-mudas">—<span> un</span></div>
+      <div class="m-status" id="st-expans"><span class="dot dot-grey"></span> Aguardando</div>
+    </div>
+  </div>
+
+  <!-- Updates -->
+  <div class="section-row">Updates do Dia</div>
+
+  <div class="update-card">
+    <div class="uc-header">
+      <div class="uc-title">📦 Procurement</div>
+      <div class="uc-time" id="time-proc">—</div>
+    </div>
+    <div class="uc-text" id="text-proc"><span class="empty">Nenhum update ainda hoje.</span></div>
+  </div>
+
+  <div class="update-card">
+    <div class="uc-header">
+      <div class="uc-title">📋 Gestão</div>
+      <div class="uc-time" id="time-gest">—</div>
+    </div>
+    <div class="uc-text" id="text-gest"><span class="empty">Nenhum update ainda hoje.</span></div>
+  </div>
+
+  <div class="update-card">
+    <div class="uc-header">
+      <div class="uc-title">📝 Observações de Campo</div>
+    </div>
+    <div class="uc-text" id="obs-combined"><span class="empty">Sem observações adicionais.</span></div>
+  </div>
+
+  <!-- History -->
+  <div class="section-row" style="margin-top:8px">Histórico Recente</div>
+  <div class="history-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Componente</th>
+          <th>Dado</th>
+        </tr>
+      </thead>
+      <tbody id="history-body">
+        <tr><td colspan="3" style="text-align:center;color:#bbb;padding:20px">Carregando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3ghlaoLR5SicIlGenCsF6ruOLuBCgCOmrej7qSGCkt6F0O1X-cfGJZV8kB1tJSLK48Q/exec';
+  const META = 170000;
+
+  const today = new Date();
+  const dateKey = today.toISOString().split('T')[0];
+  const opts = { day: 'numeric', month: 'long', year: 'numeric' };
+  document.getElementById('date-badge').textContent = today.toLocaleDateString('pt-BR', opts);
+
+  function fmtTime(ts) {
+    if (!ts) return '—';
+    return new Date(ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function fmtDate(d) {
+    if (!d) return '—';
+    const [y,m,day] = d.split('-');
+    return `${day}/${m}/${y}`;
+  }
+
+  function badgeClass(g) {
+    return { manutencao: 'badge-manut', expansao: 'badge-expans', procurement: 'badge-proc', gestao: 'badge-gest' }[g] || '';
+  }
+  function badgeLabel(g) {
+    return { manutencao: '🌿 Manutenção', expansao: '🥥 Expansão', procurement: '📦 Procurement', gestao: '📋 Gestão' }[g] || g;
+  }
+
+  async function loadData() {
+    const btn = document.getElementById('refresh-btn');
+    const icon = document.getElementById('refresh-icon');
+    icon.innerHTML = '<span class="spin">↻</span>';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(SCRIPT_URL + '?t=' + Date.now());
+      const rows = await res.json();
+
+      // Filter today
+      const todayRows = rows.filter(r => r.data === dateKey);
+
+      // Map by gerente
+      const byGerente = {};
+      todayRows.forEach(r => { byGerente[r.gerente] = r; });
+
+      // Manutenção
+      if (byGerente.manutencao) {
+        const r = byGerente.manutencao;
+        document.getElementById('val-ha').innerHTML = `${parseFloat(r.ha_manutencao || 0).toFixed(1)}<span> ha</span>`;
+        document.getElementById('st-manut').innerHTML = `<span class="dot dot-green"></span> Enviado às ${fmtTime(r.timestamp)}`;
+      } else {
+        document.getElementById('val-ha').innerHTML = `—<span> ha</span>`;
+        document.getElementById('st-manut').innerHTML = `<span class="dot dot-grey"></span> Aguardando`;
+      }
+
+      // Expansão
+      if (byGerente.expansao) {
+        const r = byGerente.expansao;
+        document.getElementById('val-mudas').innerHTML = `${parseInt(r.mudas_plantadas || 0).toLocaleString('pt-BR')}<span> un</span>`;
+        document.getElementById('st-expans').innerHTML = `<span class="dot dot-green"></span> Enviado às ${fmtTime(r.timestamp)}`;
+      } else {
+        document.getElementById('val-mudas').innerHTML = `—<span> un</span>`;
+        document.getElementById('st-expans').innerHTML = `<span class="dot dot-grey"></span> Aguardando`;
+      }
+
+      // Procurement text
+      if (byGerente.procurement?.procurement) {
+        document.getElementById('text-proc').textContent = byGerente.procurement.procurement;
+        document.getElementById('time-proc').textContent = fmtTime(byGerente.procurement.timestamp);
+      } else {
+        document.getElementById('text-proc').innerHTML = '<span class="empty">Nenhum update ainda hoje.</span>';
+        document.getElementById('time-proc').textContent = '—';
+      }
+
+      // Gestão text
+      if (byGerente.gestao?.gestao) {
+        document.getElementById('text-gest').textContent = byGerente.gestao.gestao;
+        document.getElementById('time-gest').textContent = fmtTime(byGerente.gestao.timestamp);
+      } else {
+        document.getElementById('text-gest').innerHTML = '<span class="empty">Nenhum update ainda hoje.</span>';
+        document.getElementById('time-gest').textContent = '—';
+      }
+
+      // Observações combinadas
+      const obs = [];
+      if (byGerente.manutencao?.obs_manutencao) obs.push(`🌿 Manutenção: ${byGerente.manutencao.obs_manutencao}`);
+      if (byGerente.expansao?.obs_expansao) obs.push(`🥥 Expansão: ${byGerente.expansao.obs_expansao}`);
+      document.getElementById('obs-combined').innerHTML = obs.length
+        ? obs.map(o => `<div style="margin-bottom:6px">${o}</div>`).join('')
+        : '<span class="empty">Sem observações adicionais.</span>';
+
+      // Total mudas acumulado
+      const totalMudas = rows.reduce((acc, r) => acc + parseInt(r.mudas_plantadas || 0), 0);
+      const pct = Math.min((totalMudas / META) * 100, 100);
+      document.getElementById('total-mudas').innerHTML = `${totalMudas.toLocaleString('pt-BR')}<span> mudas</span>`;
+      document.getElementById('progress-fill').style.width = pct + '%';
+      document.getElementById('pct-label').textContent = `${pct.toFixed(1)}% concluído`;
+      document.getElementById('remaining-label').textContent = `${Math.max(META - totalMudas, 0).toLocaleString('pt-BR')} restantes`;
+
+      // History table — last 20 rows, reversed
+      const recent = [...rows].reverse().slice(0, 20);
+      const tbody = document.getElementById('history-body');
+      if (recent.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#bbb;padding:20px">Sem dados ainda.</td></tr>';
+      } else {
+        tbody.innerHTML = recent.map(r => {
+          let dado = '—';
+          if (r.gerente === 'manutencao') dado = r.ha_manutencao ? `${r.ha_manutencao} ha` : '—';
+          if (r.gerente === 'expansao') dado = r.mudas_plantadas ? `${parseInt(r.mudas_plantadas).toLocaleString('pt-BR')} mudas` : '—';
+          if (r.gerente === 'procurement') dado = r.procurement ? r.procurement.substring(0, 50) + (r.procurement.length > 50 ? '…' : '') : '—';
+          if (r.gerente === 'gestao') dado = r.gestao ? r.gestao.substring(0, 50) + (r.gestao.length > 50 ? '…' : '') : '—';
+          return `<tr>
+            <td>${fmtDate(r.data)}</td>
+            <td><span class="badge ${badgeClass(r.gerente)}">${badgeLabel(r.gerente)}</span></td>
+            <td>${dado}</td>
+          </tr>`;
+        }).join('');
+      }
+
+      document.getElementById('last-update').textContent = 'Atualizado às ' + fmtTime(new Date().toISOString());
+
+    } catch(err) {
+      console.error(err);
+      document.getElementById('last-update').textContent = '⚠ Erro ao carregar dados';
+    }
+
+    icon.innerHTML = '↻';
+    btn.disabled = false;
+  }
+
+  loadData();
+  // Auto-refresh a cada 5 minutos
+  setInterval(loadData, 5 * 60 * 1000);
+</script>
+</body>
+</html>
