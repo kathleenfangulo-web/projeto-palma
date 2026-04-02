@@ -23,8 +23,12 @@
   .date-bar strong { font-size: 12px; color: var(--gold-light); font-weight: 600; }
   .form-body { background: var(--cream); border-radius: 24px 24px 0 0; padding: 24px 16px 50px; min-height: calc(100vh - 180px); }
   .who-row { margin-bottom: 16px; }
-  select, input[type="number"], textarea { width: 100%; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--text); background: var(--white); border: 1.5px solid var(--border); border-radius: 12px; padding: 13px 14px; outline: none; transition: border-color 0.2s, box-shadow 0.2s; -webkit-appearance: none; }
-  select:focus, input[type="number"]:focus, textarea:focus { border-color: var(--green-mid); box-shadow: 0 0 0 3px rgba(45,106,69,0.12); }
+  select, input[type="number"], input[type="text"], textarea {
+    width: 100%; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--text);
+    background: var(--white); border: 1.5px solid var(--border); border-radius: 12px;
+    padding: 13px 14px; outline: none; transition: border-color 0.2s, box-shadow 0.2s; -webkit-appearance: none;
+  }
+  select:focus, input:focus, textarea:focus { border-color: var(--green-mid); box-shadow: 0 0 0 3px rgba(45,106,69,0.12); }
   textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
   .card { background: var(--white); border-radius: 16px; padding: 16px; margin-bottom: 14px; border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: none; }
   .card.active { display: block; }
@@ -42,6 +46,24 @@
   .ic-proc { background: rgba(200,146,42,0.12); }
   .ic-gest { background: rgba(120,60,160,0.1); }
   .ic-contagem { background: rgba(180,60,60,0.1); }
+  .ic-consumo { background: rgba(200,120,20,0.12); }
+  .ic-estoque { background: rgba(20,120,180,0.12); }
+  .ic-equip { background: rgba(60,60,60,0.08); }
+  .ic-rh { background: rgba(40,160,100,0.1); }
+
+  /* Table input styles */
+  .table-input { width: 100%; border-collapse: collapse; margin-top: 4px; }
+  .table-input th { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); padding: 6px 8px; background: var(--cream); border: 1px solid var(--border); text-align: center; }
+  .table-input td { padding: 4px; border: 1px solid var(--border); }
+  .table-input td:first-child { padding: 8px 10px; font-size: 13px; font-weight: 500; color: var(--text); background: var(--cream); white-space: nowrap; }
+  .table-input input[type="number"] { border: none; border-radius: 8px; padding: 10px 8px; font-size: 14px; text-align: center; background: var(--white); }
+  .table-input input[type="number"]:focus { border: none; box-shadow: 0 0 0 2px rgba(45,106,69,0.2); }
+  .table-input .pct { font-size: 11px; color: var(--muted); text-align: center; padding: 8px 6px; background: var(--cream); font-weight: 600; }
+  .table-input tr:hover td { background: #faf8f3; }
+  .table-input tr:hover td:first-child { background: #f0ece4; }
+
+  .subsection-title { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin: 16px 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
   .btn-submit { width: 100%; background: var(--green); color: var(--cream); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; padding: 16px; border: none; border-radius: 14px; cursor: pointer; margin-top: 8px; transition: background 0.2s, transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 8px; }
   .btn-submit:active { transform: scale(0.98); }
   .btn-submit:disabled { background: #aaa; cursor: not-allowed; }
@@ -72,6 +94,10 @@
       <option value="procurement">📦 Gerente — Procurement</option>
       <option value="gestao">📋 Gerente — Gestão</option>
       <option value="contagem">🌱 Gerente — Contagem & Pagamento</option>
+      <option value="consumo">🛢️ Gerente — Consumo do Dia</option>
+      <option value="estoque">📦 Gerente — Estoque Remanescente</option>
+      <option value="equipamentos">🔧 Gerente — Equipamentos</option>
+      <option value="rh">👥 Gerente — RH</option>
     </select>
   </div>
 
@@ -103,12 +129,12 @@
   <div class="card" id="card-expansao">
     <div class="section-label">
       <div class="section-icon ic-expans">🥥</div>
-      <div><div class="section-title">Expansão</div><div class="section-desc">Novas mudas plantadas hoje</div></div>
+      <div><div class="section-title">Expansão</div><div class="section-desc">Campos plantados hoje</div></div>
     </div>
     <div class="input-group">
-      <label>Mudas plantadas hoje</label>
+      <label>Campos plantados hoje</label>
       <div class="unit-wrapper">
-        <input type="number" id="mudas" placeholder="0" min="0">
+        <input type="number" id="campos-plantados" placeholder="0" min="0">
         <span class="unit-tag">un</span>
       </div>
     </div>
@@ -149,9 +175,9 @@
       <div><div class="section-title">Contagem & Pagamento</div><div class="section-desc">M&E — incentivos aos produtores</div></div>
     </div>
     <div class="input-group">
-      <label>Mudas contadas hoje</label>
+      <label>Campos contados hoje</label>
       <div class="unit-wrapper">
-        <input type="number" id="mudas-contadas" placeholder="0" min="0" step="1">
+        <input type="number" id="campos-contados" placeholder="0" min="0" step="1">
         <span class="unit-tag">un</span>
       </div>
     </div>
@@ -168,6 +194,126 @@
     </div>
   </div>
 
+  <!-- CONSUMO DO DIA -->
+  <div class="card" id="card-consumo">
+    <div class="section-label">
+      <div class="section-icon ic-consumo">🛢️</div>
+      <div><div class="section-title">Consumo do Dia</div><div class="section-desc">Consumíveis utilizados hoje</div></div>
+    </div>
+    <div class="input-group">
+      <label>Quantidade consumida por item</label>
+      <table class="table-input">
+        <thead><tr><th>Item</th><th>Consumido hoje</th><th>Unidade</th></tr></thead>
+        <tbody>
+          <tr><td>Gasolina</td><td><input type="number" id="c-gasolina" placeholder="0" min="0"></td><td class="pct">L</td></tr>
+          <tr><td>NPK</td><td><input type="number" id="c-npk" placeholder="0" min="0"></td><td class="pct">kg</td></tr>
+          <tr><td>Hidrogel</td><td><input type="number" id="c-hidrogel" placeholder="0" min="0"></td><td class="pct">kg</td></tr>
+          <tr><td>Calcário</td><td><input type="number" id="c-calcario" placeholder="0" min="0"></td><td class="pct">kg</td></tr>
+          <tr><td>Infinito</td><td><input type="number" id="c-infinito" placeholder="0" min="0"></td><td class="pct">un</td></tr>
+          <tr><td>Abamectina</td><td><input type="number" id="c-abamectina" placeholder="0" min="0"></td><td class="pct">ml</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="input-group">
+      <label>Observações</label>
+      <textarea id="obs-consumo" placeholder="Alguma observação sobre o consumo de hoje..."></textarea>
+    </div>
+  </div>
+
+  <!-- ESTOQUE REMANESCENTE -->
+  <div class="card" id="card-estoque">
+    <div class="section-label">
+      <div class="section-icon ic-estoque">📦</div>
+      <div><div class="section-title">Estoque Remanescente</div><div class="section-desc">Saldo atual de consumíveis</div></div>
+    </div>
+    <div class="input-group">
+      <label>Remanescente por item</label>
+      <table class="table-input">
+        <thead><tr><th>Item</th><th>Total estoque</th><th>Remanescente</th><th>Unidade</th></tr></thead>
+        <tbody>
+          <tr><td>Gasolina</td><td><input type="number" id="t-gasolina" placeholder="0" min="0"></td><td><input type="number" id="r-gasolina" placeholder="0" min="0"></td><td class="pct">L</td></tr>
+          <tr><td>NPK</td><td><input type="number" id="t-npk" placeholder="0" min="0"></td><td><input type="number" id="r-npk" placeholder="0" min="0"></td><td class="pct">kg</td></tr>
+          <tr><td>Hidrogel</td><td><input type="number" id="t-hidrogel" placeholder="0" min="0"></td><td><input type="number" id="r-hidrogel" placeholder="0" min="0"></td><td class="pct">kg</td></tr>
+          <tr><td>Calcário</td><td><input type="number" id="t-calcario" placeholder="0" min="0"></td><td><input type="number" id="r-calcario" placeholder="0" min="0"></td><td class="pct">kg</td></tr>
+          <tr><td>Infinito</td><td><input type="number" id="t-infinito" placeholder="0" min="0"></td><td><input type="number" id="r-infinito" placeholder="0" min="0"></td><td class="pct">un</td></tr>
+          <tr><td>Abamectina</td><td><input type="number" id="t-abamectina" placeholder="0" min="0"></td><td><input type="number" id="r-abamectina" placeholder="0" min="0"></td><td class="pct">ml</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="input-group">
+      <label>Observações</label>
+      <textarea id="obs-estoque" placeholder="Alguma observação sobre o estoque..."></textarea>
+    </div>
+  </div>
+
+  <!-- EQUIPAMENTOS -->
+  <div class="card" id="card-equipamentos">
+    <div class="section-label">
+      <div class="section-icon ic-equip">🔧</div>
+      <div><div class="section-title">Equipamentos</div><div class="section-desc">Status da frota e ferramentas</div></div>
+    </div>
+    <div class="input-group">
+      <label>Status por equipamento</label>
+      <table class="table-input">
+        <thead><tr><th>Equipamento</th><th>Total</th><th>Ativos</th><th>Manutenção</th><th>Inativos</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Tuk</td>
+            <td><input type="number" id="eq-tuk-total" placeholder="0" min="0"></td>
+            <td><input type="number" id="eq-tuk-ativos" placeholder="0" min="0"></td>
+            <td><input type="number" id="eq-tuk-manut" placeholder="0" min="0"></td>
+            <td><input type="number" id="eq-tuk-inativos" placeholder="0" min="0"></td>
+          </tr>
+          <tr>
+            <td>Brocas</td>
+            <td><input type="number" id="eq-brocas-total" placeholder="0" min="0"></td>
+            <td><input type="number" id="eq-brocas-ativos" placeholder="0" min="0"></td>
+            <td><input type="number" id="eq-brocas-manut" placeholder="0" min="0"></td>
+            <td><input type="number" id="eq-brocas-inativos" placeholder="0" min="0"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="input-group">
+      <label>Observações</label>
+      <textarea id="obs-equip" placeholder="Ex: equipamento em manutenção, previsão de retorno..."></textarea>
+    </div>
+  </div>
+
+  <!-- RH -->
+  <div class="card" id="card-rh">
+    <div class="section-label">
+      <div class="section-icon ic-rh">👥</div>
+      <div><div class="section-title">RH — Presença do Dia</div><div class="section-desc">Colaboradores por empresa</div></div>
+    </div>
+    <div class="input-group">
+      <label>Presença por empresa</label>
+      <table class="table-input">
+        <thead><tr><th>Empresa</th><th>Total</th><th>Presentes</th><th>Ausentes</th><th>Férias/Rot.</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>CBE</td>
+            <td><input type="number" id="rh-cbe-total" placeholder="0" min="0"></td>
+            <td><input type="number" id="rh-cbe-presentes" placeholder="0" min="0"></td>
+            <td><input type="number" id="rh-cbe-ausentes" placeholder="0" min="0"></td>
+            <td><input type="number" id="rh-cbe-ferias" placeholder="0" min="0"></td>
+          </tr>
+          <tr>
+            <td>JFS</td>
+            <td><input type="number" id="rh-jfs-total" placeholder="0" min="0"></td>
+            <td><input type="number" id="rh-jfs-presentes" placeholder="0" min="0"></td>
+            <td><input type="number" id="rh-jfs-ausentes" placeholder="0" min="0"></td>
+            <td><input type="number" id="rh-jfs-ferias" placeholder="0" min="0"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="input-group">
+      <label>Observações</label>
+      <textarea id="obs-rh" placeholder="Ex: justificativas de ausência, contratações, desligamentos..."></textarea>
+    </div>
+  </div>
+
   <button class="btn-submit" id="btn-submit" onclick="submitReport()" style="display:none">
     ✅ Enviar Relatório do Dia
   </button>
@@ -180,18 +326,19 @@
   const today = new Date();
   document.getElementById('today-date').textContent = today.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
+  const ALL_CARDS = ['manutencao','expansao','procurement','gestao','contagem','consumo','estoque','equipamentos','rh'];
+
   function updateCards() {
     const val = document.getElementById('manager-select').value;
-    const cards = ['manutencao','expansao','procurement','gestao','contagem'];
     const placeholder = document.getElementById('placeholder');
     const btn = document.getElementById('btn-submit');
     if (!val) {
-      cards.forEach(c => document.getElementById('card-'+c).classList.remove('active'));
+      ALL_CARDS.forEach(c => document.getElementById('card-'+c).classList.remove('active'));
       placeholder.style.display = 'block';
       btn.style.display = 'none';
     } else {
       placeholder.style.display = 'none';
-      cards.forEach(c => document.getElementById('card-'+c).classList.toggle('active', c === val));
+      ALL_CARDS.forEach(c => document.getElementById('card-'+c).classList.toggle('active', c === val));
       btn.style.display = 'flex';
     }
   }
@@ -203,6 +350,9 @@
     setTimeout(() => t.classList.remove('show'), 3500);
   }
 
+  function v(id) { return document.getElementById(id)?.value || ''; }
+  function resetFields(ids) { ids.forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; }); }
+
   async function submitReport() {
     const manager = document.getElementById('manager-select').value;
     if (!manager) return;
@@ -211,30 +361,50 @@
     btn.textContent = 'Enviando...';
 
     const payload = {
-      timestamp:        new Date().toISOString(),
-      data:             today.toISOString().split('T')[0],
-      gerente:          manager,
-      ha_manutencao:    document.getElementById('ha-manut').value || '',
-      obs_manutencao:   document.getElementById('obs-manut').value || '',
-      mudas_plantadas:  document.getElementById('mudas').value || '',
-      obs_expansao:     document.getElementById('obs-expans').value || '',
-      procurement:      document.getElementById('proc-text').value || '',
-      gestao:           document.getElementById('gest-text').value || '',
-      mudas_contadas:   document.getElementById('mudas-contadas').value || '',
-      produtores_pagos: document.getElementById('produtores-pagos').value || '',
-      obs_contagem:     document.getElementById('obs-contagem').value || '',
+      timestamp: new Date().toISOString(),
+      data: today.toISOString().split('T')[0],
+      gerente: manager,
+      // Manutenção
+      ha_manutencao: v('ha-manut'), obs_manutencao: v('obs-manut'),
+      // Expansão
+      campos_plantados: v('campos-plantados'), obs_expansao: v('obs-expans'),
+      // Procurement
+      procurement: v('proc-text'),
+      // Gestão
+      gestao: v('gest-text'),
+      // Contagem
+      campos_contados: v('campos-contados'), produtores_pagos: v('produtores-pagos'), obs_contagem: v('obs-contagem'),
+      // Consumo
+      c_gasolina: v('c-gasolina'), c_npk: v('c-npk'), c_hidrogel: v('c-hidrogel'),
+      c_calcario: v('c-calcario'), c_infinito: v('c-infinito'), c_abamectina: v('c-abamectina'),
+      obs_consumo: v('obs-consumo'),
+      // Estoque
+      t_gasolina: v('t-gasolina'), r_gasolina: v('r-gasolina'),
+      t_npk: v('t-npk'), r_npk: v('r-npk'),
+      t_hidrogel: v('t-hidrogel'), r_hidrogel: v('r-hidrogel'),
+      t_calcario: v('t-calcario'), r_calcario: v('r-calcario'),
+      t_infinito: v('t-infinito'), r_infinito: v('r-infinito'),
+      t_abamectina: v('t-abamectina'), r_abamectina: v('r-abamectina'),
+      obs_estoque: v('obs-estoque'),
+      // Equipamentos
+      eq_tuk_total: v('eq-tuk-total'), eq_tuk_ativos: v('eq-tuk-ativos'), eq_tuk_manut: v('eq-tuk-manut'), eq_tuk_inativos: v('eq-tuk-inativos'),
+      eq_brocas_total: v('eq-brocas-total'), eq_brocas_ativos: v('eq-brocas-ativos'), eq_brocas_manut: v('eq-brocas-manut'), eq_brocas_inativos: v('eq-brocas-inativos'),
+      obs_equip: v('obs-equip'),
+      // RH
+      rh_cbe_total: v('rh-cbe-total'), rh_cbe_presentes: v('rh-cbe-presentes'), rh_cbe_ausentes: v('rh-cbe-ausentes'), rh_cbe_ferias: v('rh-cbe-ferias'),
+      rh_jfs_total: v('rh-jfs-total'), rh_jfs_presentes: v('rh-jfs-presentes'), rh_jfs_ausentes: v('rh-jfs-ausentes'), rh_jfs_ferias: v('rh-jfs-ferias'),
+      obs_rh: v('obs-rh'),
     };
 
     try {
       await fetch(SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
+        method: 'POST', mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
       showToast('🥥 Relatório enviado com sucesso!');
-      ['ha-manut','obs-manut','mudas','obs-expans','proc-text','gest-text','mudas-contadas','produtores-pagos','obs-contagem']
-        .forEach(id => { document.getElementById(id).value = ''; });
+      // Reset all fields
+      document.querySelectorAll('input[type="number"], textarea').forEach(el => el.value = '');
     } catch(err) {
       showToast('❌ Erro ao enviar. Tente novamente.', true);
     }
