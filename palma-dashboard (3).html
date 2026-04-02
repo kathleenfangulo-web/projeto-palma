@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projeto Palma · Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #1a4a2e; --green-mid: #2d6a45; --green-light: #4a9463;
+    --gold: #c8922a; --gold-light: #e8b84b; --gold-pale: #fdf3e3;
+    --cream: #f5f0e8; --white: #fefcf8; --text: #1a1a18; --muted: #6b6b60; --border: #d8d0c0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height: 100vh; }
+
+  /* HEADER */
+  .header { background: var(--green); padding: 28px 20px 0; position: relative; overflow: hidden; }
+  .header::before { content: ''; position: absolute; top: -60px; right: -60px; width: 220px; height: 220px; background: radial-gradient(circle, rgba(200,146,42,0.12), transparent 70%); border-radius: 50%; }
+  .header::after { content: ''; position: absolute; bottom: -30px; left: -30px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(74,148,99,0.15), transparent 70%); border-radius: 50%; }
+  .header-inner { position: relative; z-index: 1; }
+  .header-tag { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--gold-light); background: rgba(200,146,42,0.15); border: 1px solid rgba(200,146,42,0.25); padding: 3px 10px; border-radius: 20px; margin-bottom: 8px; }
+  .header h1 { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--cream); line-height: 1.15; }
+  .header h1 em { color: var(--gold-light); font-style: italic; }
+  .header-sub { font-size: 11px; color: rgba(245,240,232,0.45); margin-top: 3px; }
+  .header-meta { display: flex; justify-content: space-between; align-items: center; padding: 14px 0 16px; margin-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); }
+  .header-date { font-size: 12px; color: rgba(245,240,232,0.6); }
+  .refresh-btn { display: flex; align-items: center; gap: 5px; background: rgba(200,146,42,0.15); border: 1px solid rgba(200,146,42,0.3); color: var(--gold-light); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; padding: 7px 14px; border-radius: 20px; cursor: pointer; transition: background 0.2s; }
+  .refresh-btn:hover { background: rgba(200,146,42,0.25); }
+  .spin { animation: spin 0.8s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* BODY */
+  .body { padding: 16px; }
+
+  /* PROGRESS HERO */
+  .hero-card { background: var(--green); border-radius: 20px; padding: 20px; margin-bottom: 14px; position: relative; overflow: hidden; }
+  .hero-card::before { content: '🥥'; position: absolute; right: 16px; top: 16px; font-size: 40px; opacity: 0.15; }
+  .hero-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: rgba(245,240,232,0.5); margin-bottom: 6px; }
+  .hero-num { font-family: 'DM Serif Display', serif; font-size: 42px; color: var(--gold-light); line-height: 1; }
+  .hero-num span { font-size: 14px; font-family: 'DM Sans', sans-serif; color: rgba(245,240,232,0.5); }
+  .hero-sub { font-size: 12px; color: rgba(245,240,232,0.45); margin-top: 4px; margin-bottom: 16px; }
+  .progress-track { background: rgba(255,255,255,0.1); border-radius: 100px; height: 10px; overflow: hidden; margin-bottom: 8px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 100px; transition: width 1.4s cubic-bezier(0.4,0,0.2,1); width: 0%; position: relative; }
+  .progress-fill::after { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 20px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3)); border-radius: 100px; }
+  .progress-meta { display: flex; justify-content: space-between; font-size: 11px; color: rgba(245,240,232,0.45); }
+  .progress-meta strong { color: var(--gold-light); }
+
+  /* SECTION TITLE */
+  .section-row { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin: 16px 0 8px; display: flex; align-items: center; gap: 8px; }
+  .section-row::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* KPI GRID */
+  .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 6px; }
+  .kpi-card { background: var(--white); border-radius: 16px; padding: 16px; border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.04); position: relative; overflow: hidden; }
+  .kpi-card::before { content: attr(data-icon); position: absolute; right: 12px; bottom: 10px; font-size: 28px; opacity: 0.12; }
+  .kpi-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .kpi-value { font-family: 'DM Serif Display', serif; font-size: 30px; color: var(--text); line-height: 1; }
+  .kpi-value span { font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--muted); font-weight: 400; }
+  .kpi-status { font-size: 11px; color: var(--muted); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  .dot-green { background: #4a9463; } .dot-grey { background: #ccc; } .dot-gold { background: var(--gold); }
+
+  /* STATUS BADGE */
+  .status-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 20px; }
+  .badge-ok { background: rgba(74,148,99,0.12); color: #2d6a45; }
+  .badge-wait { background: rgba(200,200,200,0.2); color: #888; }
+
+  /* TABLE CARDS */
+  .table-card { background: var(--white); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  .table-card-header { padding: 14px 16px 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); background: var(--cream); }
+  .table-card-title { font-size: 12px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 6px; }
+  .table-card-time { font-size: 10px; color: var(--muted); }
+  table.data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.data-table th { padding: 8px 12px; text-align: center; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); background: var(--cream); border-bottom: 1px solid var(--border); }
+  table.data-table th:first-child { text-align: left; }
+  table.data-table td { padding: 10px 12px; border-bottom: 1px solid #f0ece4; color: var(--text); text-align: center; }
+  table.data-table td:first-child { text-align: left; font-weight: 500; }
+  table.data-table tr:last-child td { border-bottom: none; }
+  table.data-table tr:hover td { background: #faf8f3; }
+  .pct-bar-wrap { display: flex; align-items: center; gap: 6px; justify-content: center; }
+  .pct-bar { flex: 1; background: #eee; border-radius: 100px; height: 5px; overflow: hidden; max-width: 60px; }
+  .pct-bar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--green-mid), var(--green-light)); }
+  .pct-bar-fill.warn { background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+  .pct-bar-fill.danger { background: linear-gradient(90deg, #e74c3c, #e67e22); }
+
+  /* TEXT UPDATE CARDS */
+  .update-card { background: var(--white); border-radius: 16px; padding: 16px; border: 1px solid var(--border); margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  .uc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .uc-title { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); }
+  .uc-time { font-size: 10px; color: #bbb; }
+  .uc-text { font-size: 13px; color: var(--text); line-height: 1.6; }
+  .empty { font-size: 12px; color: #bbb; font-style: italic; }
+
+  /* EQUIP STATUS */
+  .equip-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid #f0ece4; }
+  .equip-row:last-child { border-bottom: none; }
+  .equip-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .equip-chips { display: flex; gap: 6px; }
+  .chip { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; }
+  .chip-green { background: rgba(74,148,99,0.12); color: #2d6a45; }
+  .chip-gold { background: rgba(200,146,42,0.12); color: #a07020; }
+  .chip-red { background: rgba(220,60,60,0.1); color: #b43030; }
+  .chip-grey { background: rgba(0,0,0,0.06); color: #666; }
+
+  /* LAST UPDATE BAR */
+  .last-bar { text-align: center; font-size: 11px; color: #bbb; padding: 8px 0 24px; }
+
+  /* LOADING */
+  .loading-overlay { position: fixed; inset: 0; background: var(--green); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.4s; }
+  .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+  .loading-logo { font-family: 'DM Serif Display', serif; font-size: 32px; color: var(--cream); margin-bottom: 8px; }
+  .loading-logo em { color: var(--gold-light); font-style: italic; }
+  .loading-sub { font-size: 12px; color: rgba(245,240,232,0.4); margin-bottom: 30px; }
+  .loading-spinner { width: 36px; height: 36px; border: 3px solid rgba(232,184,75,0.2); border-top-color: var(--gold-light); border-radius: 50%; animation: spin 0.8s linear infinite; }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading">
+  <div class="loading-logo">Projeto <em>Palma</em></div>
+  <div class="loading-sub">JFS Group · TotalEnergies TEPMA1</div>
+  <div class="loading-spinner"></div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <div class="header-tag">JFS Group · TotalEnergies TEPMA1</div>
+    <h1>Projeto <em>Palma</em><br>Dashboard Diário</h1>
+    <p class="header-sub">Campanha 2025/2026 · Palma, Cabo Delgado</p>
+    <div class="header-meta">
+      <div class="header-date" id="header-date">—</div>
+      <button class="refresh-btn" onclick="loadData()" id="refresh-btn">
+        <span id="refresh-icon">↻</span> Atualizar
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="body">
+
+  <!-- HERO: EXPANSÃO -->
+  <div class="hero-card">
+    <div class="hero-label">🥥 Meta de Expansão — Campanha 2025/26</div>
+    <div class="hero-num" id="total-plantados">—<span> campos</span></div>
+    <div class="hero-sub" id="hero-sub">de 170.000 campos · meta da campanha</div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="progress-meta">
+      <span id="pct-label">—</span>
+      <span><strong id="remaining-label">—</strong> restantes</span>
+    </div>
+  </div>
+
+  <!-- KPIs PRINCIPAIS -->
+  <div class="section-row">Hoje em números</div>
+  <div class="kpi-grid">
+    <div class="kpi-card" data-icon="🥥">
+      <div class="kpi-label">Campos Plantados</div>
+      <div class="kpi-value" id="val-plantados">—<span> un</span></div>
+      <div class="kpi-status" id="st-expansao"><span class="dot dot-grey"></span> Aguardando</div>
+    </div>
+    <div class="kpi-card" data-icon="🌿">
+      <div class="kpi-label">Hectares Mantidos</div>
+      <div class="kpi-value" id="val-ha">—<span> ha</span></div>
+      <div class="kpi-status" id="st-manutencao"><span class="dot dot-grey"></span> Aguardando</div>
+    </div>
+    <div class="kpi-card" data-icon="🌱">
+      <div class="kpi-label">Campos Contados</div>
+      <div class="kpi-value" id="val-contados">—<span> un</span></div>
+      <div class="kpi-status" id="st-contagem"><span class="dot dot-grey"></span> Aguardando</div>
+    </div>
+    <div class="kpi-card" data-icon="💰">
+      <div class="kpi-label">Produtores Pagos</div>
+      <div class="kpi-value" id="val-pagos">—<span> prod</span></div>
+      <div class="kpi-status" id="st-pagos"><span class="dot dot-grey"></span> Aguardando</div>
+    </div>
+  </div>
+
+  <!-- RH -->
+  <div class="section-row">RH — Presença do Dia</div>
+  <div class="table-card">
+    <div class="table-card-header">
+      <div class="table-card-title">👥 Colaboradores</div>
+      <div class="table-card-time" id="time-rh">—</div>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>Empresa</th><th>Total</th><th>Presentes</th><th>Ausentes</th><th>Férias/Rot.</th></tr></thead>
+      <tbody id="rh-body">
+        <tr><td colspan="5" style="text-align:center;color:#bbb;padding:16px">Aguardando dados...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CONSUMÍVEIS -->
+  <div class="section-row">Consumíveis</div>
+  <div class="table-card">
+    <div class="table-card-header">
+      <div class="table-card-title">🛢️ Consumo & Estoque</div>
+      <div class="table-card-time" id="time-consumo">—</div>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>Item</th><th>Consumido</th><th>Remanesc.</th><th>% usado</th></tr></thead>
+      <tbody id="consumo-body">
+        <tr><td colspan="4" style="text-align:center;color:#bbb;padding:16px">Aguardando dados...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- EQUIPAMENTOS -->
+  <div class="section-row">Equipamentos</div>
+  <div class="table-card">
+    <div class="table-card-header">
+      <div class="table-card-title">🔧 Status da Frota</div>
+      <div class="table-card-time" id="time-equip">—</div>
+    </div>
+    <div id="equip-body">
+      <div style="text-align:center;color:#bbb;padding:16px;font-size:12px">Aguardando dados...</div>
+    </div>
+  </div>
+
+  <!-- UPDATES TEXTO -->
+  <div class="section-row">Updates do Dia</div>
+
+  <div class="update-card">
+    <div class="uc-header">
+      <div class="uc-title">📦 Procurement</div>
+      <div class="uc-time" id="time-proc">—</div>
+    </div>
+    <div class="uc-text" id="text-proc"><span class="empty">Nenhum update ainda hoje.</span></div>
+  </div>
+
+  <div class="update-card">
+    <div class="uc-header">
+      <div class="uc-title">📋 Gestão</div>
+      <div class="uc-time" id="time-gest">—</div>
+    </div>
+    <div class="uc-text" id="text-gest"><span class="empty">Nenhum update ainda hoje.</span></div>
+  </div>
+
+  <!-- OBSERVAÇÕES -->
+  <div class="section-row">Observações de Campo</div>
+  <div class="update-card" id="obs-card">
+    <div class="uc-text" id="obs-combined"><span class="empty">Sem observações adicionais.</span></div>
+  </div>
+
+  <div class="last-bar" id="last-update">—</div>
+
+</div>
+
+<script>
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3ghlaoLR5SicIlGenCsF6ruOLuBCgCOmrej7qSGCkt6F0O1X-cfGJZV8kB1tJSLK48Q/exec';
+  const META = 170000;
+  const today = new Date();
+  const localDate = new Date(today.getTime() + (2 * 60 * 60 * 1000));
+  const todayKey = localDate.toISOString().substring(0, 10);
+
+  document.getElementById('header-date').textContent = today.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  function fmtTime(ts) {
+    if (!ts) return '—';
+    try { return new Date(ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); } catch(e) { return '—'; }
+  }
+  function fmtDate(d) {
+    if (!d) return '—';
+    const clean = d.toString().substring(0,10);
+    const [y,m,day] = clean.split('-');
+    return `${day}/${m}`;
+  }
+  function n(val) { return parseInt(val) || 0; }
+  function setStatus(elId, r, field) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    if (r && (r[field] !== '' && r[field] !== undefined && r[field] !== null)) {
+      el.innerHTML = `<span class="dot dot-green"></span> ${fmtDate(r.data)} às ${fmtTime(r.timestamp)}`;
+    } else {
+      el.innerHTML = `<span class="dot dot-grey"></span> Aguardando`;
+    }
+  }
+
+  function pctBar(consumed, total) {
+    if (!total || total == 0) return '—';
+    const pct = Math.min(Math.round((consumed / total) * 100), 100);
+    const cls = pct > 80 ? 'danger' : pct > 50 ? 'warn' : '';
+    return `<div class="pct-bar-wrap">
+      <div class="pct-bar"><div class="pct-bar-fill ${cls}" style="width:${pct}%"></div></div>
+      <span style="font-size:11px;color:${pct>80?'#b43030':pct>50?'#a07020':'#2d6a45'};font-weight:600">${pct}%</span>
+    </div>`;
+  }
+
+  async function loadData() {
+    const btn = document.getElementById('refresh-btn');
+    const icon = document.getElementById('refresh-icon');
+    icon.innerHTML = '<span class="spin">↻</span>';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(SCRIPT_URL + '?t=' + Date.now());
+      const rows = await res.json();
+
+      if (!Array.isArray(rows) || rows.length === 0) {
+        document.getElementById('last-update').textContent = 'Sem dados na planilha ainda.';
+        return;
+      }
+
+      // Latest per gerente + today preference
+      const latest = {};
+      rows.forEach(r => { if (r.gerente) latest[r.gerente] = r; });
+      const todayRows = rows.filter(r => r.data && r.data.toString().substring(0,10) === todayKey);
+      const todayBy = {};
+      todayRows.forEach(r => { todayBy[r.gerente] = r; });
+      const by = {};
+      ['manutencao','expansao','procurement','gestao','contagem','consumo','estoque','equipamentos','rh'].forEach(g => {
+        by[g] = todayBy[g] || latest[g] || null;
+      });
+
+      // HERO — total acumulado
+      const totalPlantados = rows.reduce((acc, r) => acc + n(r.campos_plantados), 0);
+      const pct = Math.min((totalPlantados / META) * 100, 100);
+      document.getElementById('total-plantados').innerHTML = `${totalPlantados.toLocaleString('pt-BR')}<span> campos</span>`;
+      document.getElementById('progress-fill').style.width = pct + '%';
+      document.getElementById('pct-label').textContent = `${pct.toFixed(1)}% concluído`;
+      document.getElementById('remaining-label').textContent = Math.max(META - totalPlantados, 0).toLocaleString('pt-BR');
+
+      // KPIs
+      const vPlant = by.expansao ? n(by.expansao.campos_plantados) : null;
+      document.getElementById('val-plantados').innerHTML = vPlant !== null ? `${vPlant.toLocaleString('pt-BR')}<span> un</span>` : `—<span> un</span>`;
+      setStatus('st-expansao', by.expansao, 'campos_plantados');
+
+      const vHa = by.manutencao ? by.manutencao.ha_manutencao : null;
+      document.getElementById('val-ha').innerHTML = vHa ? `${parseFloat(vHa).toFixed(1)}<span> ha</span>` : `—<span> ha</span>`;
+      setStatus('st-manutencao', by.manutencao, 'ha_manutencao');
+
+      const vCont = by.contagem ? n(by.contagem.campos_contados) : null;
+      document.getElementById('val-contados').innerHTML = vCont !== null ? `${vCont.toLocaleString('pt-BR')}<span> un</span>` : `—<span> un</span>`;
+      setStatus('st-contagem', by.contagem, 'campos_contados');
+
+      const vPagos = by.contagem ? n(by.contagem.produtores_pagos) : null;
+      document.getElementById('val-pagos').innerHTML = vPagos !== null ? `${vPagos.toLocaleString('pt-BR')}<span> prod</span>` : `—<span> prod</span>`;
+      setStatus('st-pagos', by.contagem, 'produtores_pagos');
+
+      // RH
+      const rh = by.rh;
+      document.getElementById('time-rh').textContent = rh ? `${fmtDate(rh.data)} às ${fmtTime(rh.timestamp)}` : '—';
+      if (rh) {
+        document.getElementById('rh-body').innerHTML = `
+          <tr>
+            <td><strong>CBE</strong></td>
+            <td>${n(rh.rh_cbe_total)}</td>
+            <td><span style="color:#2d6a45;font-weight:600">${n(rh.rh_cbe_presentes)}</span></td>
+            <td><span style="color:#b43030;font-weight:600">${n(rh.rh_cbe_ausentes)}</span></td>
+            <td>${n(rh.rh_cbe_ferias)}</td>
+          </tr>
+          <tr>
+            <td><strong>JFS</strong></td>
+            <td>${n(rh.rh_jfs_total)}</td>
+            <td><span style="color:#2d6a45;font-weight:600">${n(rh.rh_jfs_presentes)}</span></td>
+            <td><span style="color:#b43030;font-weight:600">${n(rh.rh_jfs_ausentes)}</span></td>
+            <td>${n(rh.rh_jfs_ferias)}</td>
+          </tr>
+          <tr style="background:var(--cream)">
+            <td><strong>Total</strong></td>
+            <td><strong>${n(rh.rh_cbe_total)+n(rh.rh_jfs_total)}</strong></td>
+            <td><strong style="color:#2d6a45">${n(rh.rh_cbe_presentes)+n(rh.rh_jfs_presentes)}</strong></td>
+            <td><strong style="color:#b43030">${n(rh.rh_cbe_ausentes)+n(rh.rh_jfs_ausentes)}</strong></td>
+            <td><strong>${n(rh.rh_cbe_ferias)+n(rh.rh_jfs_ferias)}</strong></td>
+          </tr>`;
+      }
+
+      // CONSUMÍVEIS
+      const cons = by.consumo;
+      const esto = by.estoque;
+      document.getElementById('time-consumo').textContent = cons ? `${fmtDate(cons.data)} às ${fmtTime(cons.timestamp)}` : (esto ? `${fmtDate(esto.data)} às ${fmtTime(esto.timestamp)}` : '—');
+      const items = [
+        { label: 'Gasolina', c: 'c_gasolina', t: 't_gasolina', r: 'r_gasolina', unit: 'L' },
+        { label: 'NPK', c: 'c_npk', t: 't_npk', r: 'r_npk', unit: 'kg' },
+        { label: 'Hidrogel', c: 'c_hidrogel', t: 't_hidrogel', r: 'r_hidrogel', unit: 'kg' },
+        { label: 'Calcário', c: 'c_calcario', t: 't_calcario', r: 'r_calcario', unit: 'kg' },
+        { label: 'Infinito', c: 'c_infinito', t: 't_infinito', r: 'r_infinito', unit: 'un' },
+        { label: 'Abamectina', c: 'c_abamectina', t: 't_abamectina', r: 'r_abamectina', unit: 'ml' },
+      ];
+      if (cons || esto) {
+        document.getElementById('consumo-body').innerHTML = items.map(item => {
+          const consumido = cons ? n(cons[item.c]) : 0;
+          const total = esto ? n(esto[item.t]) : 0;
+          const rem = esto ? n(esto[item.r]) : 0;
+          return `<tr>
+            <td>${item.label}</td>
+            <td>${consumido ? consumido.toLocaleString('pt-BR') + ' ' + item.unit : '—'}</td>
+            <td>${rem ? rem.toLocaleString('pt-BR') + ' ' + item.unit : '—'}</td>
+            <td>${total ? pctBar(consumido, total) : '—'}</td>
+          </tr>`;
+        }).join('');
+      }
+
+      // EQUIPAMENTOS
+      const eq = by.equipamentos;
+      document.getElementById('time-equip').textContent = eq ? `${fmtDate(eq.data)} às ${fmtTime(eq.timestamp)}` : '—';
+      if (eq) {
+        document.getElementById('equip-body').innerHTML = [
+          { label: 'Tuk', t: 'eq_tuk_total', a: 'eq_tuk_ativos', m: 'eq_tuk_manut', i: 'eq_tuk_inativos' },
+          { label: 'Brocas', t: 'eq_brocas_total', a: 'eq_brocas_ativos', m: 'eq_brocas_manut', i: 'eq_brocas_inativos' },
+        ].map(e => `
+          <div class="equip-row">
+            <div>
+              <div class="equip-name">${e.label}</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px">Total: ${n(eq[e.t])}</div>
+            </div>
+            <div class="equip-chips">
+              <span class="chip chip-green">✅ ${n(eq[e.a])} ativos</span>
+              ${n(eq[e.m]) > 0 ? `<span class="chip chip-gold">🔧 ${n(eq[e.m])} manut.</span>` : ''}
+              ${n(eq[e.i]) > 0 ? `<span class="chip chip-red">❌ ${n(eq[e.i])} inativos</span>` : ''}
+            </div>
+          </div>`).join('');
+      }
+
+      // PROCUREMENT
+      if (by.procurement?.procurement) {
+        document.getElementById('text-proc').textContent = by.procurement.procurement;
+        document.getElementById('time-proc').textContent = `${fmtDate(by.procurement.data)} às ${fmtTime(by.procurement.timestamp)}`;
+      } else {
+        document.getElementById('text-proc').innerHTML = '<span class="empty">Nenhum update ainda hoje.</span>';
+        document.getElementById('time-proc').textContent = '—';
+      }
+
+      // GESTÃO
+      if (by.gestao?.gestao) {
+        document.getElementById('text-gest').textContent = by.gestao.gestao;
+        document.getElementById('time-gest').textContent = `${fmtDate(by.gestao.data)} às ${fmtTime(by.gestao.timestamp)}`;
+      } else {
+        document.getElementById('text-gest').innerHTML = '<span class="empty">Nenhum update ainda hoje.</span>';
+        document.getElementById('time-gest').textContent = '—';
+      }
+
+      // OBSERVAÇÕES
+      const obs = [];
+      if (by.manutencao?.obs_manutencao) obs.push(`🌿 <strong>Manutenção:</strong> ${by.manutencao.obs_manutencao}`);
+      if (by.expansao?.obs_expansao) obs.push(`🥥 <strong>Expansão:</strong> ${by.expansao.obs_expansao}`);
+      if (by.contagem?.obs_contagem) obs.push(`🌱 <strong>Contagem:</strong> ${by.contagem.obs_contagem}`);
+      if (by.consumo?.obs_consumo) obs.push(`🛢️ <strong>Consumo:</strong> ${by.consumo.obs_consumo}`);
+      if (by.estoque?.obs_estoque) obs.push(`📦 <strong>Estoque:</strong> ${by.estoque.obs_estoque}`);
+      if (by.equipamentos?.obs_equip) obs.push(`🔧 <strong>Equipamentos:</strong> ${by.equipamentos.obs_equip}`);
+      if (by.rh?.obs_rh) obs.push(`👥 <strong>RH:</strong> ${by.rh.obs_rh}`);
+      document.getElementById('obs-combined').innerHTML = obs.length
+        ? obs.map(o => `<div style="margin-bottom:8px;line-height:1.5">${o}</div>`).join('')
+        : '<span class="empty">Sem observações adicionais.</span>';
+
+      document.getElementById('last-update').textContent = `Última actualização: ${fmtTime(new Date().toISOString())}`;
+
+    } catch(err) {
+      console.error(err);
+      document.getElementById('last-update').textContent = '⚠ Erro ao carregar dados. Tente atualizar.';
+    }
+
+    icon.innerHTML = '↻';
+    btn.disabled = false;
+    document.getElementById('loading').classList.add('hidden');
+  }
+
+  loadData();
+  setInterval(loadData, 5 * 60 * 1000);
+</script>
+</body>
+</html>
